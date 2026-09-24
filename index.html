@@ -1,13 +1,104 @@
 <!doctype html>
+<!--
+  index.html — JR Têxtil Fortaleza
+  Ponto de entrada do app PWA.
+  Contém: meta tags, favicon, CSS anti-badge Netlify e raiz do React.
+-->
 <html lang="pt-BR">
   <head>
+    <!-- ============================================================
+         1) Configurações básicas
+         ============================================================ -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <!-- Viewport para mobile: cobre notch do iPhone e desabilita zoom -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"
+    />
+
+    <!-- ============================================================
+         2) SEO e compartilhamento
+         ============================================================ -->
+    <title>JR Têxtil Fortaleza — Tecidos no Atacado</title>
+
+    <meta
+      name="description"
+      content="Catálogo atacadista de tecidos da JR Têxtil Fortaleza. Rolos fechados, condições para lojistas, costureiras e sacoleiras."
+    />
+
+    <meta name="author" content="JR Têxtil Fortaleza" />
+
+    <!-- Cor da barra de status no Android / iOS -->
     <meta name="theme-color" content="#0a0a0a" />
-    <title>JR Têxtil Fortaleza</title>
+
+    <!-- ============================================================
+         3) Favicon e ícones PWA (iOS)
+         ============================================================ -->
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Suporte a "instalar app" no iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="JR Têxtil" />
+
+    <!-- Suporte a "instalar app" no Android -->
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- ============================================================
+         4) CSS: esconde o badge "Powered by Netlify" (plano free)
+         ============================================================
+         O badge é injetado em runtime pelo script da Netlify no canto
+         inferior. Este CSS o oculta sem afetar nenhuma outra funcionalidade.
+         Referência estável: elementos com atributo data-netlify-badge
+         ou links para netlify.com que aparecem como overlay.
+    -->
+    <style>
+      /* Regra 1 — elementos marcados com o atributo oficial */
+      [data-netlify-badge] {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      /* Regra 2 — link/botão flutuante apontando para netlify.com
+         que fica sobre a página (badge "Powered by Netlify") */
+      a[href*="netlify.com"][target="_blank"][rel*="noopener"] {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      /* Regra 3 — iframe do badge (fallback) */
+      iframe[src*="netlify.com"] {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      /* Regra 4 — garante que o body não cria espaço pro badge */
+      body > div:last-child[style*="position: fixed"],
+      body > a:last-child[style*="position: fixed"] {
+        display: none !important;
+      }
+    </style>
   </head>
+
   <body>
+    <!-- ============================================================
+         5) Raiz do React
+         ============================================================
+         O React monta toda a aplicação dentro desta div.
+         Não coloque nada mais dentro dela.
+    -->
     <div id="root"></div>
+
+    <!-- ============================================================
+         6) Bootstrap do Vite / React
+         ============================================================
+         Este script carrega src/main.tsx, que monta o React.
+    -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
