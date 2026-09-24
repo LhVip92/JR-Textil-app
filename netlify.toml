@@ -1,0 +1,46 @@
+# ============================================================
+# Configuração da Netlify — JR Têxtil Fortaleza
+# ============================================================
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# ------------------------------------------------------------
+# Headers para PWA — corrige o MIME type do manifest
+# Sem isso, o Chrome ignora o manifest e o botão "Instalar" não aparece
+# ------------------------------------------------------------
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ------------------------------------------------------------
+# Service worker nunca em cache
+# ------------------------------------------------------------
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/registerSW.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ------------------------------------------------------------
+# Ícones PWA
+# ------------------------------------------------------------
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ------------------------------------------------------------
+# Assets com hash (JS/CSS) — cache longo e imutável
+# ------------------------------------------------------------
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
