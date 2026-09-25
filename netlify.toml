@@ -1,46 +1,140 @@
-# ============================================================
-# Configuração da Netlify — JR Têxtil Fortaleza
-# ============================================================
+# ============================================================================
+# netlify.toml — JR Têxtil Fortaleza
+# Configuração completa: build, redirects (SPA) e headers (PWA + cache)
+# ============================================================================
 
+# ============================================================
+# BUILD
+# ============================================================
 [build]
   command = "npm run build"
   publish = "dist"
 
-# ------------------------------------------------------------
-# Headers para PWA — corrige o MIME type do manifest
-# Sem isso, o Chrome ignora o manifest e o botão "Instalar" não aparece
-# ------------------------------------------------------------
+# ============================================================
+# REDIRECTS
+# ============================================================
+# A ordem importa. Arquivos físicos existentes no deploy são servidos ANTES
+# das regras, mas mantemos as regras explícitas para garantir que nada seja
+# interceptado indevidamente pelo SPA fallback.
+
+# --- PWA: service worker (nunca cachear, sempre fresco) ---
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+
+# --- PWA: script de registro do SW ---
+[[redirects]]
+  from = "/registerSW.js"
+  to = "/registerSW.js"
+  status = 200
+
+# --- PWA: manifest ---
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/manifest.webmanifest"
+  status = 200
+
+# --- PWA: workbox runtime (hasheado pelo Vite) ---
+[[redirects]]
+  from = "/workbox-:hash.js"
+  to = "/workbox-:hash.js"
+  status = 200
+
+# --- SPA fallback (DEVE SER O ÚLTIMO) ---
+# Sem isso, rotas como /admin/products/:id/edit quebram ao recarregar a página.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ============================================================
+# HEADERS — MIME types e cache
+# ============================================================
+
+# --- Manifest: MIME correto para o Chrome reconhecer o PWA ---
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]
     Content-Type = "application/manifest+json"
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# ------------------------------------------------------------
-# Service worker nunca em cache
-# ------------------------------------------------------------
+# --- Service worker: sempre revalidar (essencial para PWA) ---
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
 
+# --- registerSW.js: mesmo tratamento ---
 [[headers]]
   for = "/registerSW.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# ------------------------------------------------------------
-# Ícones PWA
-# ------------------------------------------------------------
+# --- Workbox runtime (hash no nome → cache longo) ---
+[[headers]]
+  for = "/workbox-*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# --- Ícones PWA (nunca mudam → cache longo) ---
 [[headers]]
   for = "/icons/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# ------------------------------------------------------------
-# Assets com hash (JS/CSS) — cache longo e imutável
-# ------------------------------------------------------------
+# --- Assets do Vite (JS/CSS com hash → cache longo) ---
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# --- HTML (index, offline) — nunca cachear ---
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# --- Imagens na raiz (logo, og-image) — 7 dias ---
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# --- Favicon raiz — 7 dias ---
+[[headers]]
+  for = "/favicon.ico"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# --- Robots e sitemap — cache curto ---
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+# --- Segurança: headers básicos ---
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
